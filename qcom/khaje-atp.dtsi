@@ -1,6 +1,7 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/iio/qcom,spmi-vadc.h>
 #include <dt-bindings/input/input.h>
+#include "bengal-audio-overlay.dtsi"
 #include "khaje-sde-display.dtsi"
 #include "khaje-pm7250b.dtsi"
 
@@ -89,6 +90,7 @@
 	vcc-supply = <&L24A>;
 	vcc-voltage-level = <2950000 2960000>;
 	vccq2-supply = <&L11A>;
+	vccq2-voltage-level = <1800000 1800000>;
 	vcc-max-microamp = <800000>;
 	vccq2-max-microamp = <800000>;
 	vccq2-pwr-collapse-sup;
@@ -282,4 +284,26 @@
 
 		panel = <&dsi_nt36672e_fhd_plus_90hz_video>;
 	};
+};
+
+&pm7250b_charger {
+	dpdm-supply = <&usb2_phy0>;
+
+	smb5_vbus: qcom,smb5-vbus {
+		regulator-name = "smb5-vbus";
+	};
+
+	smb5_vconn: qcom,smb5-vconn {
+		regulator-name = "smb5-vconn";
+	};
+};
+
+&pm7250b_pdphy {
+	vdd-pdphy-supply = <&L15A>;
+	vbus-supply = <&smb5_vbus>;
+	vconn-supply = <&smb5_vconn>;
+};
+
+&usb0 {
+	extcon = <&pm7250b_pdphy>, <&pm7250b_charger>, <&eud>;
 };

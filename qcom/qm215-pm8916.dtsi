@@ -198,7 +198,7 @@
 };
 
 &pm8916_vadc {
-        #thermal-sensor-cells = <1>;
+	#thermal-sensor-cells = <1>;
 	usb_in {
 		reg = <VADC_USBIN>;
 		label = "usb_in";
@@ -235,7 +235,7 @@
 		qcom,pre-scaling = <1 1>;
 	};
 
-	skin_therm{
+	skin_therm {
 		reg = <VADC_P_MUX2_1_1>;
 		label = "skin_therm";
 		qcom,ratiometric;
@@ -285,24 +285,72 @@
 	};
 };
 
-&pm8916_adc_tm {
-	io-channels = <&pm8916_vadc VADC_LR_MUX1_BAT_THERM>,
-			<&pm8916_vadc VADC_VBAT_SNS>;
+&pm8916_adc_tm_iio {
+	io-channels = <&pm8916_vadc VADC_LR_MUX3_BUF_XO_THERM>,
+			<&pm8916_vadc VADC_LR_MUX3_XO_THERM>,
+			<&pm8916_vadc VADC_LR_MUX7_HW_ID>,
+			<&pm8916_vadc VADC_P_MUX2_1_1>;
+	io-channel-names = "xo_therm_buf", "xo_therm", "pa_therm0",
+				"skin_therm";
 
-	/* Channel Node */
+	pa_therm0 {
+		reg = <VADC_LR_MUX7_HW_ID>;
+		label = "pa_therm0";
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		qcom,pre-scaling = <1 1>;
+	};
+
+	xo_therm {
+		reg = <VADC_LR_MUX3_XO_THERM>;
+		label = "xo_therm";
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		qcom,pre-scaling = <1 1>;
+	};
+
+	xo_therm_buf {
+		reg = <VADC_LR_MUX3_BUF_XO_THERM>;
+		label = "xo_therm_buf";
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		qcom,pre-scaling = <1 1>;
+	};
+
+	skin_therm {
+		reg = <VADC_P_MUX2_1_1>;
+		label = "skin_therm";
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		qcom,pre-scaling = <1 1>;
+	};
+};
+
+&pm8916_adc_tm {
+	/* Channel Nodes */
 	batt_therm {
 		reg = <VADC_LR_MUX1_BAT_THERM>;
 		label = "batt_therm";
+		io-channels = <&pm8916_vadc VADC_LR_MUX1_BAT_THERM>;
+		io-channel-names = "batt_therm";
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,decimation = <0>;
 		qcom,ratiometric;
-		qcom,hw-settle-time = <2000>;
+		qcom,hw-settle-time = <0xb>;
+		qcom,scale-fn-type = <8>;
 		qcom,fast-avg-setup = <0x2>;
 		qcom,btm-channel-number = <0x48>;
 	};
 
 	vbat_sns {
-		label = "vbat_sns";
 		reg = <VADC_VBAT_SNS>;
-		qcom,hw-settle-time = <2000>;
+		label = "vbat_sns";
+		io-channels = <&pm8916_vadc VADC_VBAT_SNS>;
+		io-channel-names = "vbat_sns";
+		qcom,pre-div-channel-scaling = <1>;
+		qcom,decimation = <0>;
+		qcom,hw-settle-time = <0xb>;
+		qcom,scale-fn-type = <0>;
 		qcom,fast-avg-setup = <0x2>;
 		qcom,btm-channel-number = <0x68>;
 	};
@@ -312,8 +360,9 @@
 	thermal-zones {
 		xo-therm-buf-adc {
 			polling-delay-passive = <0>;
-			polling-delay = <5000>;
-			thermal-sensors = <&pm8916_vadc VADC_LR_MUX3_BUF_XO_THERM>;
+			polling-delay = <0>;
+			thermal-sensors = <&pm8916_adc_tm_iio
+						VADC_LR_MUX3_BUF_XO_THERM>;
 			thermal-governor = "user_space";
 
 			trips {
@@ -327,8 +376,9 @@
 
 		xo-therm-adc {
 			polling-delay-passive = <0>;
-			polling-delay = <5000>;
-			thermal-sensors = <&pm8916_vadc VADC_LR_MUX3_XO_THERM>;
+			polling-delay = <0>;
+			thermal-sensors = <&pm8916_adc_tm_iio
+						VADC_LR_MUX3_XO_THERM>;
 			thermal-governor = "user_space";
 
 			trips {
@@ -342,8 +392,9 @@
 
 		pa-therm0-adc {
 			polling-delay-passive = <0>;
-			polling-delay = <5000>;
-			thermal-sensors = <&pm8916_vadc VADC_LR_MUX7_HW_ID>;
+			polling-delay = <0>;
+			thermal-sensors = <&pm8916_adc_tm_iio
+						VADC_LR_MUX7_HW_ID>;
 			thermal-governor = "user_space";
 
 			trips {
@@ -357,8 +408,9 @@
 
 		skin-therm-adc {
 			polling-delay-passive = <0>;
-			polling-delay = <5000>;
-			thermal-sensors = <&pm8916_vadc VADC_P_MUX2_1_1>;
+			polling-delay = <0>;
+			thermal-sensors = <&pm8916_adc_tm_iio
+						VADC_P_MUX2_1_1>;
 			thermal-governor = "user_space";
 
 			trips {
@@ -408,7 +460,8 @@
 		xo-therm-step {
 			polling-delay-passive = <1000>;
 			polling-delay = <5000>;
-			thermal-sensors = <&pm8916_vadc VADC_LR_MUX3_XO_THERM>;
+			thermal-sensors = <&pm8916_adc_tm_iio
+						VADC_LR_MUX3_XO_THERM>;
 			thermal-governor = "step_wise";
 
 			trips {
